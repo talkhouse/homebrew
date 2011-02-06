@@ -2,8 +2,8 @@ require 'formula'
 
 class Mysql <Formula
   homepage 'http://dev.mysql.com/doc/refman/5.1/en/'
-  url 'http://mysql.llarian.net/Downloads/MySQL-5.1/mysql-5.1.49.tar.gz'
-  md5 'a90d87a71fa3c23dff6d78afc8e3184c'
+  url 'http://mysql.mirrors.pair.com/Downloads/MySQL-5.1/mysql-5.1.54.tar.gz'
+  md5 '2a0f45a2f8b5a043b95ce7575796a30b'
 
   depends_on 'readline'
 
@@ -21,7 +21,7 @@ class Mysql <Formula
   end
 
   def install
-    fails_with_llvm "http://github.com/mxcl/homebrew/issues/issue/144"
+    fails_with_llvm "https://github.com/mxcl/homebrew/issues/issue/144"
 
     # See: http://dev.mysql.com/doc/refman/5.1/en/configure-options.html
     # These flags may not apply to gcc 4+
@@ -45,7 +45,8 @@ class Mysql <Formula
       "--enable-assembler",
       "--enable-thread-safe-client",
       "--enable-local-infile",
-      "--enable-shared"]
+      "--enable-shared",
+      "--with-partition"]
 
     configure_args << "--without-server" if ARGV.include? '--client-only'
 
@@ -63,24 +64,25 @@ class Mysql <Formula
 
   def caveats; <<-EOS.undent
     Set up databases with:
+        unset TMPDIR
         mysql_install_db
 
     If this is your first install, automatically load on login with:
         cp #{prefix}/com.mysql.mysqld.plist ~/Library/LaunchAgents
         launchctl load -w ~/Library/LaunchAgents/com.mysql.mysqld.plist
 
-    If this is an upgrade and you already have the com.mysql.mysqld.plist loaded: 
+    If this is an upgrade and you already have the com.mysql.mysqld.plist loaded:
         launchctl unload -w ~/Library/LaunchAgents/com.mysql.mysqld.plist
         cp #{prefix}/com.mysql.mysqld.plist ~/Library/LaunchAgents
         launchctl load -w ~/Library/LaunchAgents/com.mysql.mysqld.plist
 
-    Note on upgrading: 
-        We overwrite any existing com.mysql.mysqld.plist in ~/Library/LaunchAgents 
-        if we are upgrading because previous versions of this brew created the 
+    Note on upgrading:
+        We overwrite any existing com.mysql.mysqld.plist in ~/Library/LaunchAgents
+        if we are upgrading because previous versions of this brew created the
         plist with a version specific program argument.
-    
+
     Or start manually with:
-        #{prefix}/share/mysql/mysql.server start
+        mysql.server start
     EOS
   end
 

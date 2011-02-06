@@ -5,12 +5,14 @@ class Collectd <Formula
   homepage 'http://collectd.org/'
   md5 '8cd79b4ebdb9dbeb51ba52d3463a06ef'
 
-  def skip_clean? path
-    true
-  end
+  skip_clean :all
 
   def install
-    system "./configure", "--prefix=#{prefix}", "--disable-debug", "--disable-dependency-tracking"
+    args = ["--disable-debug", "--disable-dependency-tracking",
+            "--prefix=#{prefix}", "--localstatedir=#{var}"]
+    args << "--disable-embedded-perl" if MACOS_VERSION < 10.6
+
+    system "./configure", *args
     system "make install"
   end
 end

@@ -5,7 +5,7 @@ class Rrdtool <Formula
   homepage 'http://oss.oetiker.ch/rrdtool/index.en.html'
   md5 '93ad2fc2e9ddcd7d99c611fe30284a54'
 
-  depends_on 'pkg-config'
+  depends_on 'pkg-config' => :build
   depends_on 'gettext'
   depends_on 'glib'
   depends_on 'libxml2'
@@ -19,6 +19,10 @@ class Rrdtool <Formula
 
   def patches
     DATA # Ha-ha, but sleeping is annoying when running configure a lot
+  end
+
+  def options
+    [["--lua", "Compile with lua support."]]
   end
 
   def install
@@ -35,11 +39,7 @@ class Rrdtool <Formula
     system "./configure", *args
 
     # Needed to build proper Ruby bundle
-    if Hardware.is_64_bit? and MACOS_VERSION >= 10.6
-      ENV["ARCHFLAGS"] = "-arch x86_64"
-    else
-      ENV["ARCHFLAGS"] = "-arch i386"
-    end
+    ENV["ARCHFLAGS"] = snow_leopard_64? ? "-arch x86_64" : "-arch i386"
 
     system "make install"
     prefix.install "bindings/ruby/test.rb"

@@ -1,11 +1,9 @@
 require 'formula'
 
 class RxvtUnicode < Formula
-  url 'http://dist.schmorp.de/rxvt-unicode/rxvt-unicode-9.07.tar.bz2'
+  url 'http://dist.schmorp.de/rxvt-unicode/Attic/rxvt-unicode-9.07.tar.bz2'
   homepage 'http://software.schmorp.de/pkg/rxvt-unicode.html'
   md5 '49bb52c99e002bf85eb41d8385d903b5'
-
-  aka :urxvt
 
   def patches
     # Add 256 color support
@@ -13,18 +11,15 @@ class RxvtUnicode < Formula
   end
 
   def install
-    system "./configure",
-           "--prefix=#{prefix}",
-           "--disable-afterimage",
-           "--enable-perl",
-           "--enable-256-color",
-           "--with-term=rxvt-256color",
-           "--disable-dependency-tracking"
+    system "./configure", "--disable-dependency-tracking",
+                          "--prefix=#{prefix}",
+                          "--disable-afterimage",
+                          "--enable-perl",
+                          "--enable-256-color",
+                          "--with-term=rxvt-256color"
     system "make"
-
     # `make` won't work unless we rename this
     system "mv INSTALL README.install"
-
     system "make install"
   end
 

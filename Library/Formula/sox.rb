@@ -6,7 +6,6 @@ class Sox <Formula
   md5 'b99871c7bbae84feac9d0d1f010331ba'
 
   depends_on 'libvorbis' => :optional
-  depends_on 'libflac' => :optional
 
   def install
     configure_args = [
