@@ -1,7 +1,7 @@
 class Volumes
   def initialize
     @volumes = []
-    raw_mounts=`mount`
+    raw_mounts=`/sbin/mount`
     raw_mounts.split("\n").each do |line|
       case line
       when /^(.+) on (\S+) \(/
@@ -70,6 +70,22 @@ def check_for_stray_dylibs
     Unexpected dylibs:
   EOS
   puts *bad_dylibs.collect { |f| "    #{f}" }
+  puts
+end
+
+def check_for_stray_static_libs
+  unbrewed_alibs = Dir['/usr/local/lib/*.a'].select { |f| File.file? f and not File.symlink? f }
+  return if unbrewed_alibs.empty?
+
+  puts <<-EOS.undent
+    Unbrewed static libraries were found in /usr/local/lib.
+
+    If you didn't put them there on purpose they could cause problems when
+    building Homebrew formulae, and may need to be deleted.
+
+    Unexpected static libraries:
+  EOS
+  puts *unbrewed_alibs.collect { |f| "    #{f}" }
   puts
 end
 
@@ -562,13 +578,22 @@ def check_for_MACOSX_DEPLOYMENT_TARGET
 end
 
 def check_for_CLICOLOR_FORCE
-  target_var = ENV['CLICOLOR_FORCE']
-  return if target_var.to_s.empty?
-
-  unless target_var == MACOS_VERSION.to_s
+  target_var = ENV['CLICOLOR_FORCE'].to_s
+  unless target_var.empty?
     puts <<-EOS.undent
-    $CLICOLOR_FORCE was set to #{target_var}
-    Having $CLICOLOR_FORCE set can cause git installs to fail.
+    $CLICOLOR_FORCE was set to \"#{target_var}\".
+    Having $CLICOLOR_FORCE set can cause git builds to fail.
+
+    EOS
+  end
+end
+
+def check_for_GREP_OPTIONS
+  target_var = ENV['GREP_OPTIONS'].to_s
+  unless target_var.empty?
+    puts <<-EOS.undent
+    $GREP_OPTIONS was set to \"#{target_var}\".
+    Having $GREP_OPTIONS set can cause CMake builds to fail.
 
     EOS
   end
@@ -576,15 +601,17 @@ end
 
 def check_for_other_frameworks
   # Other frameworks that are known to cause problems when present
-  if File.exist? "/Library/Frameworks/expat.framework"
-    puts <<-EOS.undent
-      /Library/Frameworks/expat.framework detected
+  ["/Library/Frameworks/expat.framework", "/Library/Frameworks/libexpat.framework"].each do |f|
+    if File.exist? f
+      puts <<-EOS.undent
+        #{f} detected
 
-      This will be picked up by Cmake's build system and likey cause the
-      build to fail, trying to link to a 32-bit version of expat.
-      You may need to move this file out of the way to compile Cmake.
+        This will be picked up by Cmake's build system and likey cause the
+        build to fail, trying to link to a 32-bit version of expat.
+        You may need to move this file out of the way to compile Cmake.
 
-    EOS
+      EOS
+    end
   end
 end
 
@@ -600,6 +627,7 @@ module Homebrew extend self
       check_homebrew_prefix
       check_for_macgpg2
       check_for_stray_dylibs
+      check_for_stray_static_libs
       check_gcc_versions
       check_for_other_package_managers
       check_for_x11
@@ -618,6 +646,7 @@ module Homebrew extend self
       check_for_dyld_vars
       check_for_MACOSX_DEPLOYMENT_TARGET
       check_for_CLICOLOR_FORCE
+      check_for_GREP_OPTIONS
       check_for_symlinked_cellar
       check_for_multiple_volumes
       check_for_git
