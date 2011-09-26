@@ -1,9 +1,9 @@
 require 'formula'
 
 class Cufflinks < Formula
-  url 'http://cufflinks.cbcb.umd.edu/downloads/cufflinks-1.0.0.tar.gz'
+  url 'http://cufflinks.cbcb.umd.edu/downloads/cufflinks-1.1.0.tar.gz'
   homepage 'http://cufflinks.cbcb.umd.edu/'
-  md5 '64d6f1e60bab51d53d67e322a5e02b48'
+  md5 '5f3a10d3a1f3b86309896fee6eaea155'
 
   depends_on 'boost'
   depends_on 'samtools'
