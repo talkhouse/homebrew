@@ -1,14 +1,13 @@
 require 'formula'
 
 class P11Kit < Formula
-  url 'http://p11-glue.freedesktop.org/releases/p11-kit-0.6.tar.gz'
   homepage 'http://p11-glue.freedesktop.org'
-  md5 'c1ff3e52f172fda8bf3b426f7fb63c92'
+  url 'http://p11-glue.freedesktop.org/releases/p11-kit-0.13.tar.gz'
+  sha256 '3cb942465efd5bde1c1875826118fe4bca45b0c9edc7c87835909a5866bed325'
 
   def patches
-    # Patch to get PATH_MAX; fixed upstream:
-    # http://cgit.freedesktop.org/p11-glue/p11-kit/commit/?id=8054865
-    DATA
+    # Upstream patch to fix duplicate symbol error
+    "http://cgit.freedesktop.org/p11-glue/p11-kit/patch/?id=4a6a685c03bd"
   end
 
   def install
@@ -21,22 +20,3 @@ class P11Kit < Formula
     system "make install"
   end
 end
-
-__END__
-diff --git a/p11-kit/modules.c b/p11-kit/modules.c
-index 3f1eae1..4c87cee 100644
---- a/p11-kit/modules.c
-+++ b/p11-kit/modules.c
-@@ -50,11 +50,12 @@
- #include <dirent.h>
- #include <dlfcn.h>
- #include <errno.h>
-+#include <limits.h>
- #include <pthread.h>
- #include <stdarg.h>
- #include <stddef.h>
--#include <stdlib.h>
- #include <stdio.h>
-+#include <stdlib.h>
- #include <string.h>
- #include <unistd.h>
